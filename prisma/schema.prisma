@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Taxpayer {
+    id        Int      @id @default(autoincrement())
+    rfc       String
+    name      String
+    address   String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    Invoice Invoice[]
+    Payment Payment[]
+}
+
+model Invoice {
+    id         Int      @id @default(autoincrement())
+    taxpayerId Int
+    date       DateTime
+    total      Float
+    iva        Float
+    discount   Float?
+    subtotal   Float
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    taxpayer Taxpayer @relation(fields: [taxpayerId], references: [id])
+    Taxes    Taxes[]
+}
+
+model Payment {
+    id          Int      @id @default(autoincrement())
+    taxpayerId  Int
+    paymentDate DateTime
+    amountPaid  Float
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    taxpayer      Taxpayer        @relation(fields: [taxpayerId], references: [id])
+    PaymentDetail PaymentDetail[]
+    Withholding   Withholding[]
+}
+
+model PaymentDetail {
+    id        Int      @id @default(autoincrement())
+    paymentId Int
+    concept   String?
+    amount    Float
+    invoiceId Int?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    payment   Payment  @relation(fields: [paymentId], references: [id])
+}
+
+model Withholding {
+    id        Int      @id @default(autoincrement())
+    paymentId Int
+    type      String
+    rate      Float
+    amount    Float
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    payment   Payment  @relation(fields: [paymentId], references: [id])
+}
+
+model Taxes {
+    id        Int      @id @default(autoincrement())
+    invoiceId Int
+    type      String
+    rate      Float
+    amount    Float
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    invoice   Invoice  @relation(fields: [invoiceId], references: [id])
+}
