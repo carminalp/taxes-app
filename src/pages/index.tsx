@@ -2,6 +2,8 @@ import React from "react";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Avatar from "@material-ui/core/Avatar";
 import { useState, useEffect } from "react";
+import Form from "~/components/form";
+import { useRouter } from "next/router";
 
 interface Data {
   id: number;
@@ -27,6 +29,19 @@ const styles = makeStyles((theme: Theme) =>
 
 const TaxpayersItem: React.FC<Props> = ({ data }) => {
   const classes = styles();
+  const router = useRouter();
+
+  const handleClick = (id:number, rfc: string, name: string, address: string) => {
+    router.push({
+      pathname: "/updateForm",
+      query: {
+        id: id,
+        rfc: rfc,
+        name: name,
+        address: address,
+      },
+    });
+  };
 
   return (
     <div className="relative overflow-x-auto ">
@@ -35,16 +50,9 @@ const TaxpayersItem: React.FC<Props> = ({ data }) => {
           <tr>
             <th scope="col"></th>
             <th scope="col" className="font-inter py-4 text-base font-normal">
-              Taxpayers
+              Contribuyentes
             </th>
-            <th scope="col" className="justify-center">
-              <button
-                type="button"
-                className="bg-primary-700 hover:bg-primary-800 focus:ring-primary-300 flex items-center justify-center rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-black text-sky-100 ring-gray-300 hover:bg-sky-700 focus:border-gray-900 focus:outline-none focus:ring focus:ring-4"
-              >
-                Agregar
-              </button>
-            </th>
+            <th scope="col" className="justify-center"></th>
           </tr>
         </thead>
         <tbody>
@@ -72,10 +80,21 @@ const TaxpayersItem: React.FC<Props> = ({ data }) => {
                 </p>
               </th>
               <th className="w-40 justify-center ">
-                <button type="button" className="hover:text-sky-700">
+                <button type="button" className="hover:text-red-700">
                   Eliminar
                 </button>
-                <button type="button" className="hover:text-sky-700">
+                <button
+                  type="button"
+                  className="flex space-x-4 hover:text-sky-700"
+                  onClick={() =>
+                    handleClick(
+                      Taxpayers.id,
+                      Taxpayers.rfc,
+                      Taxpayers.name,
+                      Taxpayers.address
+                    )
+                  }
+                >
                   Editar
                 </button>
               </th>
@@ -93,7 +112,7 @@ export default function Tabla() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/taxpayer")
+    fetch("/api/getTaxpayer")
       .then((res) => res.json())
       .then((data) => {
         setData(data);
@@ -106,12 +125,15 @@ export default function Tabla() {
   // Manejo de errores cuando no hay información disponible
   if (!data) return <p>No profile data</p>;
   return (
-    <section className="bg-gray-50 p-3 dark:bg-gray-900 sm:p-5">
-      <div className="mx-auto max-w-screen-xl px-4 lg:px-12">
-        <div className="p-4 md:space-x-4 md:space-y-0">
-          <TaxpayersItem data={data} />
+    <div>
+      <Form />
+      <section className="bg-gray-50 p-3 dark:bg-gray-900">
+        <div className="px-4">
+          <div className="p-4 md:space-x-4 md:space-y-0">
+            <TaxpayersItem data={data} />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

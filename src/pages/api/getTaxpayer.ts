@@ -4,10 +4,11 @@ import type { NextApiRequest, NextApiResponse } from "next";
 const prisma = new PrismaClient();
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  // Manejo de errores cuando se tarda en hacer la conexión con la bd
+  // Manejo de errores
   try {
     const taxpayers = await prisma.taxpayer.findMany({
       select: {
+        id: true,
         rfc: true,
         name: true,
         address: true,
